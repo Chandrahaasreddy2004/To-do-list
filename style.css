@@ -19,7 +19,8 @@ body{
 }
 .fa-book{
     font-size: 48px; 
-    color: rgb(255, 98, 0);
+    color: rgb(255, 98, 0)
+    ;
 }
 .fa-trash{
     font-size: 18px;
@@ -62,9 +63,9 @@ body{
     }
     .form-check{
         margin-right:10px
-    }
-    .container {
-        padding: 5px; 
+    }.container {
+        width: 90%;
+        padding: 10px; /* Adjust padding as needed */
     }
 }
 .intro h2 {

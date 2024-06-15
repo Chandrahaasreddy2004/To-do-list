@@ -3,10 +3,11 @@ let text = document.getElementsByClassName("form-control")[0];
 let add_parent = document.getElementsByClassName("add-todo")[0];
 let update_progress = document.getElementsByClassName("progress-bar progress-bar-striped active")[0];
 let progress = document.getElementsByClassName("progress")[0];
+const container = document.querySelector('.container');
 progress.style.visibility = "hidden";
 
 //  create a task
-function create_task(new_text,add)
+function create_task(new_text,add,checkbox_clicked,index)
         {
            // store in local storage
            function saveTasks(task,add)
@@ -14,18 +15,26 @@ function create_task(new_text,add)
             if (add==1)
                 {
                     let storedData = JSON.parse(localStorage.getItem('data')) || [];
+                    let storedCheckbox = JSON.parse(localStorage.getItem('checkbox')) || [];
                     storedData.push(task);
+                    storedCheckbox.push(0);
                     localStorage.setItem('data', JSON.stringify(storedData));
+                    localStorage.setItem('checkbox',JSON.stringify(storedCheckbox));
                 }
+            
            }
+
            saveTasks(new_text,add);
 
            function DeleteTask(task)
            {
                 let storedData =  JSON.parse(localStorage.getItem('data'));
+                let storedCheckbox=  JSON.parse(localStorage.getItem('checkbox'));
                 let ind = storedData.findIndex((each_task)=>{ each_task === task});
                 storedData.splice(ind,1);
+                storedCheckbox.splice(ind,1);
                 localStorage.setItem('data', JSON.stringify(storedData));
+                localStorage.setItem('checkbox', JSON.stringify(storedCheckbox));
            }
 
         let create_div = document.createElement("div");
@@ -61,11 +70,20 @@ function create_task(new_text,add)
 
         text.value="";
 
-        // check no of checkboxes clicked when a new event is occured
+        if (checkbox_clicked==1)
+            {
+                let update_checks  = document.getElementsByClassName("form-check-input")[index];
+                update_checks.checked=true;
+                 const taskDiv = update_checks.parentElement.parentElement.parentElement
+                const taskTitle = taskDiv.querySelector('h2'); // Find the <h2> element inside the task div
+                 taskTitle.style.textDecoration = "line-through";
+                  taskTitle.style.textDecorationColor = "rgb(255, 98, 0)";
+                  taskTitle.style.textDecorationThickness = "2px";
+            
+            }
 
         function check_clicked()
         {
-
             let total_clicks = document.getElementsByClassName("form-check-input");
             let  clicked= 0;
             let all_info=[];
@@ -74,7 +92,15 @@ function create_task(new_text,add)
                     if (total_clicks[i].checked)
                         {
                             clicked+=1;
+                            let storedCheckbox = JSON.parse(localStorage.getItem('checkbox'));
+                            storedCheckbox[i]=1;
+                            localStorage.setItem('checkbox',JSON.stringify(storedCheckbox));
                         }
+                    else{
+                            let storedCheckbox = JSON.parse(localStorage.getItem('checkbox'));
+                            storedCheckbox[i]=0;
+                            localStorage.setItem('checkbox',JSON.stringify(storedCheckbox));        
+                    }
                 }
                 all_info.push((clicked/total_clicks.length)*100);
                 all_info.push(clicked);
@@ -102,7 +128,20 @@ function create_task(new_text,add)
 
         //add event listener to check total clicks
 
-        checkbox_input.addEventListener("click",()=>{
+        checkbox_input.addEventListener("click",(event)=>{
+            if (checkbox_input.checked)
+            {
+                const taskDiv = event.target.closest('.style'); // Find the closest task div
+                const taskTitle = taskDiv.querySelector('h2'); // Find the <h2> element inside the task div
+                taskTitle.style.textDecoration = "line-through";
+                taskTitle.style.textDecorationColor = "rgb(255, 98, 0)";
+                taskTitle.style.textDecorationThickness = "2px";
+            }
+            else{
+                const taskDiv = event.target.closest('.style'); // Find the closest task div
+                const taskTitle = taskDiv.querySelector('h2'); // Find the <h2> element inside the task div
+                taskTitle.style.textDecoration = "none";            
+            }
             let check_clicks = check_clicked();
             update_progess_bar(check_clicks);
         });
@@ -120,14 +159,12 @@ function create_task(new_text,add)
 
 add_button.addEventListener("click",()=>{
     let new_text = text.value;
-    let add=1;
-    if (new_text.length==0)
+        if (new_text.length==0)
         {
             alert("Provide the details...")
         }
     else{
-        
-        create_task(new_text,1);
+        create_task(new_text,1,0,-1);
     }
 })
 
@@ -138,12 +175,15 @@ add_button.addEventListener("click",()=>{
 
 document.addEventListener('DOMContentLoaded', () => {
     let items = localStorage.getItem("data");
-
+    let storedCheckbox = JSON.parse(localStorage.getItem('checkbox'));
+    let dup = storedCheckbox;
+    let i=0;
     if (items) {
         items = JSON.parse(items); // Parse the string into an array
     
         items.forEach(element => {
-            create_task(element, 0);
+            create_task(element, 0,dup[i],i);
+            i+=1;
         });
     }
        }
